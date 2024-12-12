@@ -11,7 +11,7 @@ conn = pyodbc.connect(
 )
 cursor = conn.cursor()
 
-# Consume messages
+# Consume messages from Kafka
 consumer = KafkaConsumer(
     "stock-prices",
     bootstrap_servers="localhost:9092",
