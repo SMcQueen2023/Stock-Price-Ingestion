@@ -1,4 +1,5 @@
 from kafka import KafkaProducer
+print("KafkaProducer imported successfully!")
 import yfinance as yf
 import json
 import time
