@@ -13,15 +13,20 @@ cursor = conn.cursor()
 
 # Create table if not exists
 cursor.execute("""
-CREATE TABLE IF NOT EXISTS StockPrices (
-    ID INT IDENTITY PRIMARY KEY,
-    Timestamp DATETIME,
-    Ticker NVARCHAR(10),
-    Open FLOAT,
-    High FLOAT,
-    Low FLOAT,
-    Close FLOAT,
-    Volume INT
+IF NOT EXISTS (
+    SELECT 1 
+    FROM sys.objects 
+    WHERE object_id = OBJECT_ID(N'StockPrices') 
+    AND type = N'U'
+)
+BEGIN
+    CREATE TABLE StockPrices (
+        Id INT PRIMARY KEY IDENTITY(1,1),
+        Symbol NVARCHAR(10),
+        Price FLOAT,
+        Timestamp DATETIME
+    )
+END
 )
 """)
 conn.commit()
