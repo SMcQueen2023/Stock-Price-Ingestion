@@ -6,7 +6,7 @@ import pyodbc
 conn = pyodbc.connect(
     "Driver={ODBC Driver 17 for SQL Server};"
     "Server=localhost;"
-    "Database=StockPriceAnalysis;"
+    "Database=StockPriceAnalysis;"  # Replace with your database name
     "Trusted_Connection=yes;"
 )
 cursor = conn.cursor()
@@ -15,9 +15,8 @@ cursor = conn.cursor()
 cursor.execute("""
 IF NOT EXISTS (
     SELECT 1 
-    FROM sys.objects 
-    WHERE object_id = OBJECT_ID(N'StockPrices') 
-    AND type = N'U'
+    FROM sys.tables 
+    WHERE name = 'StockPrices'
 )
 BEGIN
     CREATE TABLE StockPrices (
@@ -30,11 +29,11 @@ BEGIN
         Close FLOAT,
         Volume INT
     )
-END
+END;
 """)
 conn.commit()
 
-# Consume messages
+# Consume messages from Kafka
 consumer = KafkaConsumer(
     "stock-prices",
     bootstrap_servers="localhost:9092",
