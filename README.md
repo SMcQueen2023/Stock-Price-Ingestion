@@ -7,3 +7,13 @@ This is a data engineering project using:
     - Python for language to start/stop Kafka and feed the data to SQL Server
 - Power BI for data visualization
 - GitHub for version control
+
+## Steps
+
+Kafka Directory: cd C:\kafka_2.13-3.9.0
+GitHub Repo Directory: cd C:\Users\scott\OneDrive\Documents\GitHub\Stock-Price-Ingestion
+
+1. Start Zookeeper from the Kafka Directory with ".\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties"
+2. Start Kafka Broker from the Kafka Directory with ".\bin\windows\kafka-server-start.bat .\config\server.properties"
+3. Run the Python script "Stock-Price-Ingestion.py" from the GitHub Repo Directory
+4. Run the Python script "consumer.py" in the GitHub Repo Directory
