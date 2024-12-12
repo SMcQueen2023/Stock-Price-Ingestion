@@ -4,6 +4,11 @@ import yfinance as yf
 import json
 import time
 
+import six
+import sys
+if sys.version_info >= (3, 12, 0):
+    sys.modules['kafka.vendor.six.moves'] = six.moves
+
 def get_stock_data(ticker):
     stock = yf.Ticker(ticker)
     hist = stock.history(period="1d", interval="1m")
