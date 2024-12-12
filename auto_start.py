@@ -5,7 +5,6 @@ import time
 # Directories
 kafka_directory = r"C:\kafka_2.13-3.9.0"
 repo_directory = r"C:\Users\scott\OneDrive\Documents\GitHub\Stock-Price-Ingestion"
-venv_activate_path = os.path.join(repo_directory, "venv", "Scripts", "activate.bat")  # Path to venv activation script
 
 # Step 1: Start Zookeeper in a new PowerShell
 def start_zookeeper():
@@ -23,20 +22,14 @@ def start_kafka_server():
     subprocess.Popen(["powershell", "-Command", f"Start-Process powershell -ArgumentList '-NoExit', '{kafka_command} {kafka_config}'"], shell=True)
     time.sleep(5)  # Wait for Kafka server to start
 
-# Step 3: Activate Virtual Environment in a new PowerShell
-def activate_venv():
-    print("Activating virtual environment in a new PowerShell...")
-    subprocess.Popen(["powershell", "-Command", f"Start-Process powershell -ArgumentList '-NoExit', '{venv_activate_path}'"], shell=True)
-    time.sleep(2)  # Wait for virtual environment to activate
-
-# Step 4: Run Stock Price Ingestion Script in a new PowerShell
+# Step 3: Run Stock Price Ingestion Script in a new PowerShell
 def run_stock_price_ingestion():
     print("Running Stock Price Ingestion script in a new PowerShell...")
     ingestion_script = os.path.join(repo_directory, "Stock_Price_Ingestion.py")
     subprocess.Popen(["powershell", "-Command", f"Start-Process powershell -ArgumentList '-NoExit', 'python {ingestion_script}'"], shell=True)
     time.sleep(5)  # Wait for the ingestion script to start
 
-# Step 5: Run Kafka Consumer Script in a new PowerShell
+# Step 4: Run Kafka Consumer Script in a new PowerShell
 def run_kafka_consumer():
     print("Running Kafka Consumer script in a new PowerShell...")
     consumer_script = os.path.join(repo_directory, "consumer.py")
@@ -46,7 +39,6 @@ def run_kafka_consumer():
 def main():
     start_zookeeper()
     start_kafka_server()
-    activate_venv()
     run_stock_price_ingestion()
     run_kafka_consumer()
 
