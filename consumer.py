@@ -6,12 +6,12 @@ import pyodbc
 conn = pyodbc.connect(
     "Driver={ODBC Driver 17 for SQL Server};"
     "Server=localhost;"
-    "Database=StockPriceAnalysis;"  # Replace with your database name
+    "Database=StockPriceAnalysis;"
     "Trusted_Connection=yes;"
 )
 cursor = conn.cursor()
 
-# Create table if not exists
+# Create table if it doesn't exist
 cursor.execute("""
 IF NOT EXISTS (
     SELECT 1 
@@ -22,12 +22,15 @@ IF NOT EXISTS (
 BEGIN
     CREATE TABLE StockPrices (
         Id INT PRIMARY KEY IDENTITY(1,1),
-        Symbol NVARCHAR(10),
-        Price FLOAT,
-        Timestamp DATETIME
+        Timestamp DATETIME,
+        Ticker NVARCHAR(10),
+        Open FLOAT,
+        High FLOAT,
+        Low FLOAT,
+        Close FLOAT,
+        Volume INT
     )
 END
-)
 """)
 conn.commit()
 
