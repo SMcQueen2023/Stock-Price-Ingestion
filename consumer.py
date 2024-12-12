@@ -11,7 +11,7 @@ conn = pyodbc.connect(
 )
 cursor = conn.cursor()
 
-# Consume messages from Kafka
+# Consume messages
 consumer = KafkaConsumer(
     "stock-prices",
     bootstrap_servers="localhost:9092",
@@ -22,7 +22,7 @@ consumer = KafkaConsumer(
 for message in consumer:
     data = message.value
     cursor.execute("""
-    INSERT INTO StockPrices (Timestamp, Ticker, OPN_PRC, HIGH_PRC, LOW_PRC, CLOSE_PRC, Volume)
+    INSERT INTO StockPrices (Timestamp, Ticker, OPN_PRC, HIGH_PRC, LOW_PRC, CLS_PRC, Volume)
     VALUES (?, ?, ?, ?, ?, ?, ?)
     """, data["timestamp"], data["ticker"], data["open"], data["high"], data["low"], data["close"], data["volume"])
     conn.commit()
