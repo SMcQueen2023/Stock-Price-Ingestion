@@ -11,30 +11,6 @@ conn = pyodbc.connect(
 )
 cursor = conn.cursor()
 
-# Check if table exists and create it if it doesn't
-table_check_query = """
-IF NOT EXISTS (
-    SELECT 1 
-    FROM sys.tables 
-    WHERE name = 'StockPrices' AND type = 'U'
-)
-BEGIN
-    CREATE TABLE StockPrices (
-        Id INT PRIMARY KEY IDENTITY(1,1),
-        Timestamp DATETIME,
-        Ticker NVARCHAR(10),
-        Open FLOAT,
-        High FLOAT,
-        Low FLOAT,
-        Close FLOAT,
-        Volume INT
-    )
-END;
-"""
-
-cursor.execute(table_check_query)
-conn.commit()
-
 # Consume messages from Kafka
 consumer = KafkaConsumer(
     "stock-prices",
@@ -46,7 +22,7 @@ consumer = KafkaConsumer(
 for message in consumer:
     data = message.value
     cursor.execute("""
-    INSERT INTO StockPrices (Timestamp, Ticker, Open, High, Low, Close, Volume)
+    INSERT INTO StockPrices (Timestamp, Ticker, OPN_PRC, HIGH_PRC, LOW_PRC, CLOSE_PRC, Volume)
     VALUES (?, ?, ?, ?, ?, ?, ?)
     """, data["timestamp"], data["ticker"], data["open"], data["high"], data["low"], data["close"], data["volume"])
     conn.commit()
