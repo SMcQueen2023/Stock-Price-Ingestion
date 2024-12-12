@@ -16,10 +16,10 @@ cursor.execute("""
 IF NOT EXISTS (
     SELECT 1 
     FROM sys.tables 
-    WHERE name = 'StockPrices'
+    WHERE name = 'StockPrices' AND type = 'U'
 )
 BEGIN
-    CREATE TABLE StockPrices (
+    EXEC('CREATE TABLE StockPrices (
         Id INT PRIMARY KEY IDENTITY(1,1),
         Timestamp DATETIME,
         Ticker NVARCHAR(10),
@@ -28,7 +28,7 @@ BEGIN
         Low FLOAT,
         Close FLOAT,
         Volume INT
-    )
+    )')
 END;
 """)
 conn.commit()
