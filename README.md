@@ -1,5 +1,5 @@
 # Stock Price Ingestion
-
+## Overview
 This is a data engineering project using:
 - Kafka to stream the AAPL stock price using the Yahoo Finance API
 - Microsoft SQL Server (hosted locally) to store the data from Kafka
