@@ -11,15 +11,15 @@ conn = pyodbc.connect(
 )
 cursor = conn.cursor()
 
-# Create table if it doesn't exist
-cursor.execute("""
+# Check if table exists and create it if it doesn't
+table_check_query = """
 IF NOT EXISTS (
     SELECT 1 
     FROM sys.tables 
     WHERE name = 'StockPrices' AND type = 'U'
 )
 BEGIN
-    EXEC('CREATE TABLE StockPrices (
+    CREATE TABLE StockPrices (
         Id INT PRIMARY KEY IDENTITY(1,1),
         Timestamp DATETIME,
         Ticker NVARCHAR(10),
@@ -28,9 +28,11 @@ BEGIN
         Low FLOAT,
         Close FLOAT,
         Volume INT
-    )')
+    )
 END;
-""")
+"""
+
+cursor.execute(table_check_query)
 conn.commit()
 
 # Consume messages from Kafka
