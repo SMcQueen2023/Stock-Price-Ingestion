@@ -1,56 +1,93 @@
-from kafka import KafkaProducer  # Import KafkaProducer to send messages to a Kafka topic
-print("KafkaProducer imported successfully!")
+import json
+import time
+import logging
+import signal
+import sys
+from kafka import KafkaProducer
+import yfinance as yf
+from kafka.errors import KafkaError
 
-import yfinance as yf  # Import yfinance to fetch stock market data
-import json  # Import JSON to serialize data before sending it to Kafka
-import time  # Import time to add delays in the message production loop
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-import six  # Import six for compatibility adjustments
-import sys  # Import sys to handle Python version compatibility issues
+# Global flag for graceful shutdown
+terminate = False
 
-# Compatibility adjustment for Python 3.12+ to resolve module import issues in Kafka library
-if sys.version_info >= (3, 12, 0):
-    sys.modules['kafka.vendor.six.moves'] = six.moves
+def signal_handler(sig, frame):
+    """
+    Signal handler for graceful shutdown.
+    """
+    global terminate
+    logging.info("Termination signal received. Shutting down...")
+    terminate = True
 
-# Function to fetch stock data for a given ticker symbol
+# Register signal handlers
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
+
 def get_stock_data(ticker):
     """
     Fetches the latest stock data for the given ticker symbol.
-    Args:
-        ticker (str): The stock ticker symbol (e.g., 'AAPL').
-    Returns:
-        dict: A dictionary containing the latest stock data, including timestamp, open, high, low, close, and volume.
     """
-    stock = yf.Ticker(ticker)  # Create a yfinance Ticker object for the stock
-    hist = stock.history(period="1d", interval="1m")  # Get the 1-day history with 1-minute intervals
-    last_quote = hist.iloc[-1]  # Extract the latest available quote
-    return {
-        "timestamp": last_quote.name.strftime("%Y-%m-%d %H:%M:%S"),  # Convert timestamp to a formatted string
-        "ticker": ticker,  # Stock ticker symbol
-        "open": last_quote["Open"],  # Opening price
-        "high": last_quote["High"],  # Highest price
-        "low": last_quote["Low"],  # Lowest price
-        "close": last_quote["Close"],  # Closing price
-        "volume": last_quote["Volume"]  # Trade volume
-    }
+    try:
+        stock = yf.Ticker(ticker)
+        hist = stock.history(period="1d", interval="1m")
+        last_quote = hist.iloc[-1]
+        return {
+            "timestamp": last_quote.name.strftime("%Y-%m-%d %H:%M:%S"),
+            "ticker": ticker,
+            "open": last_quote["Open"],
+            "high": last_quote["High"],
+            "low": last_quote["Low"],
+            "close": last_quote["Close"],
+            "volume": last_quote["Volume"]
+        }
+    except Exception as e:
+        logging.error(f"Failed to fetch stock data for {ticker}: {e}")
+        return None
 
-# Function to produce messages to Kafka
 def produce_messages(producer, topic, ticker):
     """
-    Sends stock data messages to a Kafka topic in an infinite loop.
-    Args:
-        producer (KafkaProducer): The Kafka producer instance.
-        topic (str): The Kafka topic to send messages to.
-        ticker (str): The stock ticker symbol to fetch data for.
+    Sends stock data messages to a Kafka topic.
     """
-    while True:
-        data = get_stock_data(ticker)  # Fetch the latest stock data
-        producer.send(topic, value=data)  # Send the data to the Kafka topic
-        print(f"Sent: {data}")  # Log the sent data for debugging
-        time.sleep(60)  # Wait for 60 seconds before fetching data again
+    while not terminate:
+        data = get_stock_data(ticker)
+        if data:
+            try:
+                producer.send(topic, value=data).add_callback(
+                    lambda metadata: logging.info(f"Message sent to {metadata.topic}:{metadata.partition}")
+                ).add_errback(
+                    lambda exc: logging.error(f"Failed to send message: {exc}")
+                )
+                producer.flush()
+            except KafkaError as e:
+                logging.error(f"Kafka error: {e}")
+        time.sleep(60)
 
-# Main entry point of the script
+def main():
+    kafka_broker = "127.0.0.1:9092"  # Ensure IPv4 is used
+    kafka_topic = "stock_data"
+    stock_ticker = "AAPL"  # Or load dynamically
+
+    producer = None
+    try:
+        # Initialize Kafka producer
+        producer = KafkaProducer(
+            bootstrap_servers=kafka_broker,
+            value_serializer=lambda v: json.dumps(v).encode('utf-8')
+        )
+        logging.info("Kafka producer initialized.")
+
+        # Start producing messages
+        produce_messages(producer, kafka_topic, stock_ticker)
+    except KafkaError as e:
+        logging.error(f"Error in Kafka producer: {e}")
+    except Exception as e:
+        logging.error(f"Unexpected error: {e}")
+    finally:
+        if producer:
+            logging.info("Closing Kafka producer...")
+            producer.close()
+
 if __name__ == "__main__":
-    # Define Kafka connection details
-    kafka_broker = "localhost:9092"  # Update with your Kafka broker address
-    kafka_topic = "stock_data"  # Update with your Kafka topic name
+    main()
