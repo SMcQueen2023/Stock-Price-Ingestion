@@ -2,9 +2,10 @@ import subprocess  # Module to spawn new processes and interact with them
 import os  # Module to interact with the operating system
 import time  # Module to add delays in execution
 
-# Directories
-kafka_directory = r"C:\kafka_2.13-3.9.0"  # Path to the Kafka installation directory
-repo_directory = r"C:\Users\scott\OneDrive\Documents\GitHub\Stock-Price-Ingestion"  # Path to the GitHub repository containing scripts
+# Directories (prompt user for input)
+print("Please provide the following directories:")
+kafka_directory = input("Enter the path to the Kafka installation directory: ").strip()
+repo_directory = input("Enter the path to the GitHub repository containing scripts: ").strip()
 
 # Step 1: Start Zookeeper in a new PowerShell
 def start_zookeeper():
