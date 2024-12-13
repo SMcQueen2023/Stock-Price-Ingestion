@@ -51,3 +51,6 @@ def produce_messages(producer, topic, ticker):
 
 # Main entry point of the script
 if __name__ == "__main__":
+    # Define Kafka connection details
+    kafka_broker = "localhost:9092"  # Update with your Kafka broker address
+    kafka_topic = "stock_data"  # Update with your Kafka topic name
