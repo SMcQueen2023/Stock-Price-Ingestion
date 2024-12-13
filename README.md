@@ -10,8 +10,7 @@ This is a data engineering project using:
 
 ## Steps
 
-Kafka Directory: cd C:\kafka_2.13-3.9.0
-GitHub Repo Directory: cd C:\Users\scott\OneDrive\Documents\GitHub\Stock-Price-Ingestion
+Get the path to your Kafka directory (...\kafka_2.13-3.9.0) and the location of your Python scripts.
 
 1. Start Zookeeper from the Kafka Directory with ".\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties"
 2. Start Kafka Broker from the Kafka Directory with ".\bin\windows\kafka-server-start.bat .\config\server.properties"
