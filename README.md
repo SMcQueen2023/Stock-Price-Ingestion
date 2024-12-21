@@ -1,14 +1,8 @@
 # Stock Price Ingestion
 ## Overview
-This is a data engineering project using:
-- Kafka to stream the AAPL stock price using the Yahoo Finance API
-- Microsoft SQL Server (hosted locally) to store the data from Kafka
-- Microsoft Visual Studio Code to create and modify scripts
-    - Python for language to start/stop Kafka and feed the data to SQL Server
-- Power BI for data visualization
-- GitHub for version control
+In this project, I successfully developed a real-time streaming solution for Apple Inc. (AAPL) stock prices using the Yahoo Finance API and Apache Kafka. The real-time data was streamed and ingested into Microsoft SQL Server, stored, and processed for further analysis. I then created interactive and insightful visualizations using Power BI to provide an intuitive view of stock price trends, volatility, and key metrics. To ensure efficient version control and collaboration, the entire project was managed through GitHub. Additionally, I integrated generative AI to enhance various aspects of the project, including data analysis, code development, and troubleshooting, improving efficiency and reducing development time. This project strengthened my skills in real-time data processing, database management, business intelligence, and leveraging AI for enhanced decision-making.
 
-## Steps
+## Steps without Auto-Start Script
 
 Get the path to your Kafka directory (...\kafka_2.13-3.9.0) and the location of your Python scripts.
 
