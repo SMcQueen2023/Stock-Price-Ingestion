@@ -2,6 +2,7 @@ import subprocess  # Module to spawn new processes and interact with them
 import os  # Module to interact with the operating system
 import time  # Module to add delays in execution
 import logging  # Module to log script activities
+import subprocess  # Module to interact with external processes
 
 # Configure logging to display log messages with timestamps, log levels, and the actual message
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -48,7 +49,19 @@ def start_zookeeper():
     subprocess.Popen(["powershell", "-Command", "Start-Process", "powershell", "-ArgumentList", 
                       f"'-NoExit', '{zookeeper_command} {zookeeper_config}'"])
     logging.info("Zookeeper started.")  # Log the success message
-    time.sleep(5)  # Wait for 5 seconds to ensure Zookeeper starts before proceeding
+    time.sleep(10)  # Wait for 10 seconds to ensure Zookeeper starts before proceeding
+
+def clean_zookeeper_nodes():
+    """
+    Cleans up any stale Kafka nodes in Zookeeper that might prevent Kafka from starting.
+    """
+    logging.info("Checking and cleaning up stale Zookeeper nodes...")
+    zk_cleanup_command = f"zkCli.sh -server 127.0.0.1:2181 rmr /brokers/ids"
+    try:
+        subprocess.run(zk_cleanup_command, shell=True, check=True)  # Remove any Kafka broker nodes from Zookeeper
+        logging.info("Stale Kafka nodes cleaned from Zookeeper.")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Failed to clean Zookeeper nodes: {e}")
 
 # Step 2: Start Kafka Server in a new PowerShell window
 def start_kafka_server():
@@ -64,11 +77,14 @@ def start_kafka_server():
     validate_file_exists(kafka_command)
     validate_file_exists(kafka_config)
 
+    # Clean up stale Zookeeper nodes before starting Kafka
+    clean_zookeeper_nodes()
+
     # Start Kafka server in a new PowerShell window using subprocess
     subprocess.Popen(["powershell", "-Command", "Start-Process", "powershell", "-ArgumentList", 
                       f"'-NoExit', '{kafka_command} {kafka_config}'"])
     logging.info("Kafka server started.")  # Log the success message
-    time.sleep(5)  # Wait for 5 seconds to ensure Kafka starts before proceeding
+    time.sleep(10)  # Wait for 10 seconds to ensure Kafka starts before proceeding
 
 # Step 3: Run Stock Price Ingestion Script in a new PowerShell window
 def run_stock_price_ingestion():
@@ -86,7 +102,7 @@ def run_stock_price_ingestion():
     subprocess.Popen(["powershell", "-Command", "Start-Process", "powershell", "-ArgumentList", 
                       f"'-NoExit', 'python {ingestion_script}'"])
     logging.info("Stock Price Ingestion script started.")  # Log the success message
-    time.sleep(5)  # Wait for 5 seconds before starting the next step
+    time.sleep(10)  # Wait for 10 seconds before starting the next step
 
 # Step 4: Run Kafka Consumer Script in a new PowerShell window
 def run_kafka_consumer():
